@@ -290,3 +290,8 @@ function mouseClicked(){
         }
     }
 }
+
+// NOVAS FUNCIONALIDADES
+
+function cenario(){}
+function gameover(){}
