@@ -18,6 +18,7 @@ let FASE = 0;
 var TIMERVALUE = 120;
 let VIDAS = 3;
 let MORREU = false;
+let SONG_FAIL;
 let VIDA = []
 let SPRITE = [],
     SONG_COLLISION = [],
@@ -43,6 +44,7 @@ function preload() {
     SPRITE[4] = loadImage('assets/images/astronaut2LEFT.png');
     SPRITE[5] = loadImage('assets/images/astronaut3LEFT.png');
     SONG_COLLISION[0] = loadSound('assets/songs/colidiu_certo.wav');
+    SONG_FAIL = loadSound('assets/songs/game_over_bad_chest.wav');
     ASTEROIDES[0] = loadImage('assets/images/asteroids/Asteroid Brown 1.png');
     ASTEROIDES[1] = loadImage('assets/images/asteroids/Asteroid Brown 2.png');
     ASTEROIDES[2] = loadImage('assets/images/asteroids/Asteroid Brown 3.png');
@@ -66,7 +68,7 @@ function draw() {
     textFont(FONTGAME);
 
     // APENAS AS TELAS QUE TENHAM VALORES DIFERENTES DE 4 E 2 MOSTRAM O BACKGROUND DO BUZZ.
-    if (TELA != 4 && TELA != 2) {
+    if (TELA == 1 || TELA == 3) {
         image(BACKGROUND_IMAGE, WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
     }
     // ---------------------------------------------------------------------------------
@@ -79,6 +81,10 @@ function draw() {
         instrucoes();
     } else if (TELA === 4) {
         creditos();
+    } else if (TELA === 5){
+        gameover(causa_morte);
+    } else if(TELA === 6){
+        congratulations();
     }
     // ---------------------------------------------------------------------------------
 }
@@ -132,9 +138,15 @@ function missao() {
     textSize(20);
     text("x", POSITION_MISSAOX, 140);
     fill(FONT_COLOR);
-    text("1) Colida nos asteroides que\n dão origem a dizima simples: \n 0,333333...", POSITION_MISSAO_RECT_TEXT, HEIGHT_WINDOW / 2 - 20)
+    if (FASE == 0) {
+        text("1) Colida nos asteroides que\n dão origem a dizima simples: \n 0,333333...", POSITION_MISSAO_RECT_TEXT, HEIGHT_WINDOW / 2 - 20)
+    }else if(FASE == 1){
+        text("2) Colida nos asteroides que\n dão origem a dizima simples: \n 1,222222...", POSITION_MISSAO_RECT_TEXT, HEIGHT_WINDOW / 2 - 20)
+    }
     textFont(FONTGAME);
 }
+
+let causa_morte;
 
 function fase() {
     if (FASE == 1) {
@@ -159,13 +171,17 @@ function fase() {
         vida();
 
         if (TIMERVALUE <= 0) {
-            gameover("TIMER");
-        }else if(MORREU){
-            gameover("VIDAS");
+            TELA = 5;
+            causa_morte = "TIMER";
+        } else if (MORREU) {
+            TELA = 5;
+            causa_morte = "VIDAS";
             MORREU = false;
         }
-        if (GANHOU){
-            congratulations();
+        if (GANHOU) {
+            FASE = 2;
+            TELA = 6;
+            GANHOU = false;
         }
     }
 }
@@ -405,10 +421,13 @@ function mouseClicked() {
         FASE = 0;
         TIMERVALUE = 120;
         VIDAS = 3;
+        controle = 1;
+        SONG_FAIL.stop();
         // LIMPANDO O VETOR
         reiniciar_colisao();
     } else if ((mouseX >= 291 && mouseX <= 390) && (mouseY >= 15 && mouseY <= 29)) { // REINICIAR
         MOVEX = 30;
+        TELA = 2;
         STATE_ASTRONAUT = 0;
         keyCode = 0;
         MOVEY_AS = -80;
@@ -419,6 +438,8 @@ function mouseClicked() {
         FASE = 0;
         TIMERVALUE = 120;
         VIDAS = 3;
+        controle = 1;
+        SONG_FAIL.stop();
         reiniciar_colisao();
     }
     // ---------------------------------------------------------------------------------
@@ -431,6 +452,8 @@ function mouseClicked() {
             MOVEY_AS = -80;
             POSITION_X = 50 + Math.floor(Math.random() * 330);
             TIMERVALUE = 120;
+            VIDAS = 3;
+            controle = 1;
             reiniciar_colisao();
         }
     }
@@ -467,14 +490,19 @@ function vida() {
 
 function gameover(causa) {
     textSize(120);
-    if(causa === "TIMER"){
+    background('black');
+    if (causa === "TIMER") {
         text("Game Over", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
         text("Tempo esgotado", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2 + 50);
-    }else{
+    } else {
         text("Game Over", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
         text("Vidas acabaram", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2 + 50);
     }
+    SONG_FAIL.play();
     reiniciar_colisao();
+    textSize(50);
+    text('EXIT', 30, 30);
+    text('REINICIAR', 340, 30);
 }
 
 // RESETANDO AS COLISÕES
@@ -492,23 +520,22 @@ let controle = 1;
 
 function logic_fracao(denominador, divisor) {
     if (FASE == 1 && n_colisoes == 2) {
-        a = (parseFloat(denominador/divisor).toFixed(6))
+        a = (parseFloat(denominador / divisor).toFixed(6))
         if (parseFloat(a) == 0.333333) {
             GANHOU = true;
             n_colisoes = 0;
             reiniciar_colisao();
-        } else if(controle == 1) {
+        } else if (controle == 1) {
             VIDAS = 2;
             controle = 2;
             n_colisoes = 0;
             reiniciar_colisao();
-        } else if(controle == 2){
+        } else if (controle == 2) {
             VIDAS = 1;
             controle = 3;
             n_colisoes = 0;
             reiniciar_colisao();
-        }
-        else if(controle == 3){
+        } else if (controle == 3) {
             VIDAS = 0;
             controle = 4;
             n_colisoes = 0;
@@ -518,13 +545,12 @@ function logic_fracao(denominador, divisor) {
     return GANHOU;
 }
 
-function congratulations(){
+function congratulations() {
     textSize(120);
     text("Parabéns", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
     textSize(80);
     text("Voce passou de fase", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2 + 50);
-    VIDAS = 3;
-    TIMERVALUE = 120;
-    controle = 1;
-    GANHOU = false;
 }
+
+
+// ORGANIZAÇÃO TÁ TERRÍVEL
