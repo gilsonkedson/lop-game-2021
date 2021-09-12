@@ -3,7 +3,7 @@ let HEIGHT_WINDOW = 400; // ALTURA DA TELA
 let OPCOES = ['JOGAR', 'INSTRUÇÕES', 'CRÉDITOS']; // OPÇÕES DO MENU
 let FONT_COLOR = '#dcfcd4'; // COR DA FONTE
 let BACKGROUND_COLOR = '#54814a'; // COR PADRÃO DO FUNDO DAS TELAS
-let TELA = 2; // TELA INICIAL
+let TELA = 1; // TELA INICIAL
 let PAGINATION = 1 // PARA INSTRUÇÕES E CRÉDITOS
 let MOVEX_TEXT = WIDTH_WINDOW / 2; // MOVIMENTO DO NOME DA FASE NO EIXO X
 let MOVEX = 30; // MOVIMENTO DO ASTRONAUTA NO EIXO X
@@ -20,13 +20,14 @@ let VIDAS = 3;
 let MORREU = false;
 let SONG_FAIL;
 let VIDA = []
+let HOVER_MUSIC;
 let SPRITE = [],
     SONG_COLLISION = [],
     ASTEROIDES = [],
     BACKGROUND_MUSIC, BACKGROUND_IMAGE, FONTGAME, SETARIGHT, SETALEFT, MYIMAGE, SETARIGHT2, SETALEFT2, PROFIMAGE, BACKGROUND_GAME, BACKGROUND_GAME_2; // VARIAVEIS QUE TEM ARQUIVOS A SEREM CARREGADOS
 
 function preload() {
-    BACKGROUND_MUSIC = loadSound('assets/songs/ObservingTheStar.ogg');
+    soundFormats('mp3', 'ogg', 'wav');
     BACKGROUND_IMAGE = loadImage('assets/images/aoinfinitoalem.jpg');
     BACKGROUND_GAME = loadImage('assets/images/parallax-space-backgound.png');
     BACKGROUND_GAME_2 = loadImage('assets/images/indigo_lf.png')
@@ -53,6 +54,8 @@ function preload() {
     ASTEROIDES[5] = loadImage('assets/images/asteroids/Asteroid Brown 7.png');
     VIDA[0] = loadImage('assets/images/life/hp cheio.png');
     VIDA[1] = loadImage('assets/images/life/hp perdido.png');
+    BACKGROUND_MUSIC = loadSound('assets/songs/Dungeon Theme.mp3');
+    MENU_MUSIC = loadSound('assets/songs/Loop-Menu.wav');
 }
 
 function setup() {
@@ -67,7 +70,7 @@ function draw() {
     background(BACKGROUND_COLOR);
     textFont(FONTGAME);
 
-    // APENAS AS TELAS QUE TENHAM VALORES DIFERENTES DE 4 E 2 MOSTRAM O BACKGROUND DO BUZZ.
+    // APENAS AS TELAS QUE TENHAM VALORES IGUAIS A 1 E 3 MOSTRAM O BACKGROUND DO BUZZ.
     if (TELA == 1 || TELA == 3) {
         image(BACKGROUND_IMAGE, WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
     }
@@ -76,14 +79,32 @@ function draw() {
     if (TELA === 1) {
         menu();
     } else if (TELA === 2) {
+        if(MENU_MUSIC.isPlaying){
+            MENU_MUSIC.stop();
+        }
         jogar();
     } else if (TELA === 3) {
+        if(MENU_MUSIC.isPlaying){
+            MENU_MUSIC.stop();
+        }
         instrucoes();
     } else if (TELA === 4) {
+        if(MENU_MUSIC.isPlaying){
+            MENU_MUSIC.stop();
+        }
         creditos();
-    } else if (TELA === 5){
+    } else if (TELA === 5) {
+        if(MENU_MUSIC.isPlaying){
+            MENU_MUSIC.stop();
+        }
         gameover(causa_morte);
-    } else if(TELA === 6){
+    } else if (TELA === 6) {
+        if(MENU_MUSIC.isPlaying){
+            MENU_MUSIC.stop();
+        }
+        if(BACKGROUND_MUSIC.isPlaying){
+            BACKGROUND_MUSIC.stop();
+        }
         congratulations();
     }
     // ---------------------------------------------------------------------------------
@@ -140,7 +161,7 @@ function missao() {
     fill(FONT_COLOR);
     if (FASE == 0) {
         text("1) Colida nos asteroides que\n dão origem a dizima simples: \n 0,333333...", POSITION_MISSAO_RECT_TEXT, HEIGHT_WINDOW / 2 - 20)
-    }else if(FASE == 1){
+    } else if (FASE == 0.1){
         text("2) Colida nos asteroides que\n dão origem a dizima simples: \n 1,222222...", POSITION_MISSAO_RECT_TEXT, HEIGHT_WINDOW / 2 - 20)
     }
     textFont(FONTGAME);
@@ -179,7 +200,39 @@ function fase() {
             MORREU = false;
         }
         if (GANHOU) {
-            FASE = 2;
+            TELA = 6;
+            GANHOU = false;
+        }
+    } else if (FASE == 2) {
+        textSize(40);
+        text("Tempo", WIDTH_WINDOW / 2, 20);
+        if (TIMERVALUE >= 10 && TIMERVALUE < 60) {
+            text("0:" + TIMERVALUE, WIDTH_WINDOW / 2, 40);
+        } else if (TIMERVALUE < 10) {
+            text("0:0" + TIMERVALUE, WIDTH_WINDOW / 2, 40);
+        } else if (TIMERVALUE >= 60 && TIMERVALUE % 60 >= 10) {
+            text("0" + parseInt(TIMERVALUE / 60) + ":" + TIMERVALUE % 60, WIDTH_WINDOW / 2, 40);
+        } else {
+            text("0" + parseInt(TIMERVALUE / 60) + ":0" + TIMERVALUE % 60, WIDTH_WINDOW / 2, 40);
+        }
+        text('FASE 2', MOVEX_TEXT, HEIGHT_WINDOW / 2);
+        if (!(MOVEX_TEXT == 460)) {
+            MOVEX_TEXT *= 1.004;
+            textSize(50);
+            text('DIZIMA SIMPLES MAIS DIFICIL', MOVEX_TEXT, HEIGHT_WINDOW / 2 + 30);
+        }
+
+        vida();
+
+        if (TIMERVALUE <= 0) {
+            TELA = 5;
+            causa_morte = "TIMER";
+        } else if (MORREU) {
+            TELA = 5;
+            causa_morte = "VIDAS";
+            MORREU = false;
+        }
+        if (GANHOU) {
             TELA = 6;
             GANHOU = false;
         }
@@ -278,7 +331,7 @@ function cenario() {
     //console.log(colididos)
 
     // MOVENDO O ASTEROIDE
-    MOVEY_AS += 2;
+    MOVEY_AS += 2.5;
     if (MOVEY_AS >= 430) {
         MOVEY_AS = -80;
         POSITION_X = 50 + Math.floor(Math.random() * 330);
@@ -290,9 +343,12 @@ function cenario() {
         count++;
     }
 
-    logic_fracao(colididos[0], colididos[1]);
-
-    text(colididos, WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2)
+    if(FASE == 2){
+        logic_fracao(colididos[0]+''+colididos[1], colididos[2]);
+    }else{
+        logic_fracao(colididos[0], colididos[1]);
+    }
+        text(colididos, WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
 }
 
 function instrucoes() {
@@ -369,6 +425,7 @@ function mouseClicked() {
                 TELA = 4; // CRÉDITOS
             }
         }
+        MENU_MUSIC.play();
     }
     // ---------------------------------------------------------------------------------
     // VERIFICAÇÃO DAS INSTRUÇÕES/CRÉDITOS VOLTAR E PLAY
@@ -406,6 +463,23 @@ function mouseClicked() {
             }
         }
     }
+    if (TELA === 6) {
+        if ((mouseX >= 179 && mouseX <= 223) && (mouseY >= 278 && mouseY <= 320)) {
+            TELA = 2;
+            FASE = 0.1;
+            MOVEX = 30;
+            STATE_ASTRONAUT = 0;
+            keyCode = 0;
+            MOVEY_AS = -80;
+            POSITION_X = 50 + Math.floor(Math.random() * 330);
+            MOVEX_TEXT = HEIGHT_WINDOW / 2;
+            POSITION_MISSAOX = WIDTH_WINDOW / 2 + 110;
+            POSITION_MISSAO_RECT_TEXT = WIDTH_WINDOW / 2;
+            TIMERVALUE = 120;
+            VIDAS = 3;
+            controle = 1;
+        }
+    }
     // ---------------------------------------------------------------------------------
     // VOLTAR E REINICIAR DO JOGAR
     if ((mouseX >= 9 && mouseX <= 52) && (mouseY >= 15 && mouseY <= 29)) { // VOLTAR
@@ -423,6 +497,9 @@ function mouseClicked() {
         VIDAS = 3;
         controle = 1;
         SONG_FAIL.stop();
+        if(BACKGROUND_MUSIC.isPlaying){
+            BACKGROUND_MUSIC.stop();
+        }
         // LIMPANDO O VETOR
         reiniciar_colisao();
     } else if ((mouseX >= 291 && mouseX <= 390) && (mouseY >= 15 && mouseY <= 29)) { // REINICIAR
@@ -440,11 +517,14 @@ function mouseClicked() {
         VIDAS = 3;
         controle = 1;
         SONG_FAIL.stop();
+        if(BACKGROUND_MUSIC.isPlaying){
+            BACKGROUND_MUSIC.stop();
+        }
         reiniciar_colisao();
     }
     // ---------------------------------------------------------------------------------
     // FECHANDO MENSAGEM DA MISSÃO
-    if (TELA == 2) {
+    if (TELA == 2 && FASE == 0) {
         if ((mouseX >= WIDTH_WINDOW / 2 + 105 && mouseX <= WIDTH_WINDOW / 2 + 115) && (mouseY >= 130 && mouseY <= 150)) {
             POSITION_MISSAOX = 1000;
             POSITION_MISSAO_RECT_TEXT = 1000;
@@ -455,7 +535,18 @@ function mouseClicked() {
             VIDAS = 3;
             controle = 1;
             reiniciar_colisao();
+            BACKGROUND_MUSIC.play();
         }
+    }else if(TELA == 2 && FASE == 0.1){
+            POSITION_MISSAOX = 1000;
+            POSITION_MISSAO_RECT_TEXT = 1000;
+            FASE = 2;
+            MOVEY_AS = -80;
+            POSITION_X = 50 + Math.floor(Math.random() * 330);
+            TIMERVALUE = 120;
+            VIDAS = 3;
+            controle = 1;
+            reiniciar_colisao();
     }
 }
 
@@ -490,7 +581,7 @@ function vida() {
 
 function gameover(causa) {
     textSize(120);
-    background('black');
+    background('red');
     if (causa === "TIMER") {
         text("Game Over", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
         text("Tempo esgotado", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2 + 50);
@@ -542,14 +633,43 @@ function logic_fracao(denominador, divisor) {
             reiniciar_colisao();
         }
     }
+    if (FASE == 2 && n_colisoes == 3) {
+        a = (parseFloat(denominador / divisor).toFixed(6))
+        if (parseFloat(a) == 1.222222) {
+            GANHOU = true;
+            n_colisoes = 0;
+            reiniciar_colisao();
+        } else if (controle == 1) {
+            VIDAS = 2;
+            controle = 2;
+            n_colisoes = 0;
+            reiniciar_colisao();
+        } else if (controle == 2) {
+            VIDAS = 1;
+            controle = 3;
+            n_colisoes = 0;
+            reiniciar_colisao();
+        } else if (controle == 3) {
+            VIDAS = 0;
+            controle = 4;
+            n_colisoes = 0;
+            reiniciar_colisao();
+        }
+    }
     return GANHOU;
 }
 
 function congratulations() {
-    textSize(120);
-    text("Parabéns", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
-    textSize(80);
-    text("Voce passou de fase", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2 + 50);
+    //textSize(120);
+    textSize(65);
+    if(FASE == 2){
+        text("Parabéns, é isso mesmo... 11/9", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
+        text("VOCÊ VENCEU O JOGO!", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2 + 50);
+    }else{
+        text("Parabéns, é isso mesmo... 1/3", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
+        text("Voce passou de fase", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2 + 50);
+        image(SETARIGHT2, WIDTH_WINDOW / 2, 300, 50, 50);
+    }
 }
 
 
