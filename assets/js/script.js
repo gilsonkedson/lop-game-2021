@@ -10,17 +10,18 @@ let MOVEX = 30; // MOVIMENTO DO ASTRONAUTA NO EIXO X
 let STATE_ASTRONAUT = 0; // ESTADO DO ASTRONAUTA (DIREÇÃO)
 let MOVEY_AS = -80 // MOVE ASTEROIDE NO EIXO Y
 let POSITION_X = 50 + Math.floor(Math.random() * 330); // POSIÇÃO DO ASTEROIDE NO EIXO X
-let INDICE_ASTEROIDE = Math.floor(Math.random() * 6); // INDICE PRA MOSTRAR A FOTO DO ASTEROIDE
+let INDICE_ASTEROIDE = Math.floor(Math.random() * 9); // INDICE PRA MOSTRAR A FOTO DO ASTEROIDE
 let COLIDIU = false; // CONTROLE DE COLISÃO
 let POSITION_MISSAOX = WIDTH_WINDOW / 2 + 110; // POSIÇÃO DO BOTÃO DE FECHAR DA MISSÃO
 let POSITION_MISSAO_RECT_TEXT = WIDTH_WINDOW / 2; // POSIÇÃO NO EIXO X DO RETÂNGULO E O TEXTO DA MISSÃO
 let FASE = 0;
-var TIMERVALUE = 120;
+var TIMERVALUE = 180;
 let VIDAS = 3;
 let MORREU = false;
 let SONG_FAIL;
 let VIDA = []
 let HOVER_MUSIC;
+let GANHOU_MUSIC;
 let SPRITE = [],
     SONG_COLLISION = [],
     ASTEROIDES = [],
@@ -49,13 +50,17 @@ function preload() {
     ASTEROIDES[0] = loadImage('assets/images/asteroids/Asteroid Brown 1.png');
     ASTEROIDES[1] = loadImage('assets/images/asteroids/Asteroid Brown 2.png');
     ASTEROIDES[2] = loadImage('assets/images/asteroids/Asteroid Brown 3.png');
-    ASTEROIDES[3] = loadImage('assets/images/asteroids/Asteroid Brown 5.png');
-    ASTEROIDES[4] = loadImage('assets/images/asteroids/Asteroid Brown 6.png');
-    ASTEROIDES[5] = loadImage('assets/images/asteroids/Asteroid Brown 7.png');
+    ASTEROIDES[3] = loadImage('assets/images/asteroids/Asteroid Brown 4.png');
+    ASTEROIDES[4] = loadImage('assets/images/asteroids/Asteroid Brown 5.png');
+    ASTEROIDES[5] = loadImage('assets/images/asteroids/Asteroid Brown 6.png');
+    ASTEROIDES[6] = loadImage('assets/images/asteroids/Asteroid Brown 7.png');
+    ASTEROIDES[7] = loadImage('assets/images/asteroids/Asteroid Brown 8.png');
+    ASTEROIDES[8] = loadImage('assets/images/asteroids/Asteroid Brown 9.png');
     VIDA[0] = loadImage('assets/images/life/hp cheio.png');
     VIDA[1] = loadImage('assets/images/life/hp perdido.png');
     BACKGROUND_MUSIC = loadSound('assets/songs/Dungeon Theme.mp3');
     MENU_MUSIC = loadSound('assets/songs/Loop-Menu.wav');
+    GANHOU_MUSIC = loadSound('assets/songs/Well Done CCBY3.ogg');
 }
 
 function setup() {
@@ -79,30 +84,30 @@ function draw() {
     if (TELA === 1) {
         menu();
     } else if (TELA === 2) {
-        if(MENU_MUSIC.isPlaying){
+        if (MENU_MUSIC.isPlaying) {
             MENU_MUSIC.stop();
         }
         jogar();
     } else if (TELA === 3) {
-        if(MENU_MUSIC.isPlaying){
+        if (MENU_MUSIC.isPlaying) {
             MENU_MUSIC.stop();
         }
         instrucoes();
     } else if (TELA === 4) {
-        if(MENU_MUSIC.isPlaying){
+        if (MENU_MUSIC.isPlaying) {
             MENU_MUSIC.stop();
         }
         creditos();
     } else if (TELA === 5) {
-        if(MENU_MUSIC.isPlaying){
+        if (MENU_MUSIC.isPlaying) {
             MENU_MUSIC.stop();
         }
         gameover(causa_morte);
     } else if (TELA === 6) {
-        if(MENU_MUSIC.isPlaying){
+        if (MENU_MUSIC.isPlaying) {
             MENU_MUSIC.stop();
         }
-        if(BACKGROUND_MUSIC.isPlaying){
+        if (BACKGROUND_MUSIC.isPlaying) {
             BACKGROUND_MUSIC.stop();
         }
         congratulations();
@@ -161,7 +166,7 @@ function missao() {
     fill(FONT_COLOR);
     if (FASE == 0) {
         text("1) Colida nos asteroides que\n dão origem a dizima simples: \n 0,333333...", POSITION_MISSAO_RECT_TEXT, HEIGHT_WINDOW / 2 - 20)
-    } else if (FASE == 0.1){
+    } else if (FASE == 0.1) {
         text("2) Colida nos asteroides que\n dão origem a dizima simples: \n 1,222222...", POSITION_MISSAO_RECT_TEXT, HEIGHT_WINDOW / 2 - 20)
     }
     textFont(FONTGAME);
@@ -327,7 +332,6 @@ function cenario() {
     image(BACKGROUND_GAME, WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2, 400, 400);
     image(BACKGROUND_GAME_2, WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2 + 50, 400, 400);
     image(ASTEROIDES[INDICE_ASTEROIDE], POSITION_X, MOVEY_AS, 50, 50);
-
     //console.log(colididos)
 
     // MOVENDO O ASTEROIDE
@@ -335,7 +339,7 @@ function cenario() {
     if (MOVEY_AS >= 430) {
         MOVEY_AS = -80;
         POSITION_X = 50 + Math.floor(Math.random() * 330);
-        INDICE_ASTEROIDE = Math.floor(Math.random() * 6);
+        INDICE_ASTEROIDE = Math.floor(Math.random() * 9);
     }
 
     if (COLIDIU) {
@@ -343,12 +347,12 @@ function cenario() {
         count++;
     }
 
-    if(FASE == 2){
-        logic_fracao(colididos[0]+''+colididos[1], colididos[2]);
-    }else{
+    if (FASE == 2) {
+        logic_fracao(colididos[0] + '' + colididos[1], colididos[2]);
+    } else {
         logic_fracao(colididos[0], colididos[1]);
     }
-        text(colididos, WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
+    text(colididos, WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
 }
 
 function instrucoes() {
@@ -375,7 +379,7 @@ function instrucoes() {
         textSize(22);
         text('Como jogar?', WIDTH_WINDOW / 2, 110);
         textSize(20);
-        text('Utilize as setas presentes\n no seu teclado para movimentar\n o astronauta (INCOMPLETO)', WIDTH_WINDOW / 2, 140);
+        text('Utilize as setas presentes\n no seu teclado para movimentar\n o astronauta e colidir nos asteroides\n que caem até formarem uma\n determinada dizima.', WIDTH_WINDOW / 2, 140);
         image(SETARIGHT, WIDTH_WINDOW / 2, 300, 50, 50)
     }
     // ---------------------------------------------------------------------------------
@@ -475,7 +479,7 @@ function mouseClicked() {
             MOVEX_TEXT = HEIGHT_WINDOW / 2;
             POSITION_MISSAOX = WIDTH_WINDOW / 2 + 110;
             POSITION_MISSAO_RECT_TEXT = WIDTH_WINDOW / 2;
-            TIMERVALUE = 120;
+            TIMERVALUE = 180;
             VIDAS = 3;
             controle = 1;
         }
@@ -493,11 +497,11 @@ function mouseClicked() {
         POSITION_MISSAOX = WIDTH_WINDOW / 2 + 110;
         POSITION_MISSAO_RECT_TEXT = WIDTH_WINDOW / 2;
         FASE = 0;
-        TIMERVALUE = 120;
+        TIMERVALUE = 180;
         VIDAS = 3;
         controle = 1;
         SONG_FAIL.stop();
-        if(BACKGROUND_MUSIC.isPlaying){
+        if (BACKGROUND_MUSIC.isPlaying) {
             BACKGROUND_MUSIC.stop();
         }
         // LIMPANDO O VETOR
@@ -513,11 +517,11 @@ function mouseClicked() {
         POSITION_MISSAOX = WIDTH_WINDOW / 2 + 110;
         POSITION_MISSAO_RECT_TEXT = WIDTH_WINDOW / 2;
         FASE = 0;
-        TIMERVALUE = 120;
+        TIMERVALUE = 180;
         VIDAS = 3;
         controle = 1;
         SONG_FAIL.stop();
-        if(BACKGROUND_MUSIC.isPlaying){
+        if (BACKGROUND_MUSIC.isPlaying) {
             BACKGROUND_MUSIC.stop();
         }
         reiniciar_colisao();
@@ -531,22 +535,25 @@ function mouseClicked() {
             FASE = 1;
             MOVEY_AS = -80;
             POSITION_X = 50 + Math.floor(Math.random() * 330);
-            TIMERVALUE = 120;
+            TIMERVALUE = 180;
             VIDAS = 3;
             controle = 1;
             reiniciar_colisao();
             BACKGROUND_MUSIC.play();
         }
-    }else if(TELA == 2 && FASE == 0.1){
+    } else if (TELA == 2 && FASE == 0.1) {
+        if ((mouseX >= WIDTH_WINDOW / 2 + 105 && mouseX <= WIDTH_WINDOW / 2 + 115) && (mouseY >= 130 && mouseY <= 150)) {
             POSITION_MISSAOX = 1000;
             POSITION_MISSAO_RECT_TEXT = 1000;
             FASE = 2;
             MOVEY_AS = -80;
             POSITION_X = 50 + Math.floor(Math.random() * 330);
-            TIMERVALUE = 120;
+            TIMERVALUE = 180;
             VIDAS = 3;
             controle = 1;
             reiniciar_colisao();
+            BACKGROUND_MUSIC.play();
+        }
     }
 }
 
@@ -589,7 +596,12 @@ function gameover(causa) {
         text("Game Over", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
         text("Vidas acabaram", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2 + 50);
     }
-    SONG_FAIL.play();
+    if (BACKGROUND_MUSIC.isPlaying()) {
+        BACKGROUND_MUSIC.stop();
+    }
+    if (!SONG_FAIL.isPlaying()) {
+        SONG_FAIL.play();
+    }
     reiniciar_colisao();
     textSize(50);
     text('EXIT', 30, 30);
@@ -662,13 +674,16 @@ function logic_fracao(denominador, divisor) {
 function congratulations() {
     //textSize(120);
     textSize(65);
-    if(FASE == 2){
+    if (FASE == 2) {
         text("Parabéns, é isso mesmo... 11/9", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
         text("VOCÊ VENCEU O JOGO!", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2 + 50);
-    }else{
+    } else {
         text("Parabéns, é isso mesmo... 1/3", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
         text("Voce passou de fase", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2 + 50);
         image(SETARIGHT2, WIDTH_WINDOW / 2, 300, 50, 50);
+        if (!GANHOU_MUSIC.isPlaying()) {
+            GANHOU_MUSIC.play();
+        }
     }
 }
 
