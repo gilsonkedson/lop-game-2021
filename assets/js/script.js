@@ -676,7 +676,7 @@ function congratulations() {
     textSize(65);
     if (FASE == 2) {
         text("Parabéns, é isso mesmo... 11/9", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
-        text("VOCÊ VENCEU O JOGO!", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2 + 50);
+        text("VOCE VENCEU O JOGO!", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2 + 50);
     } else {
         text("Parabéns, é isso mesmo... 1/3", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2);
         text("Voce passou de fase", WIDTH_WINDOW / 2, HEIGHT_WINDOW / 2 + 50);
